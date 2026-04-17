@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ruleta PRO Stream</title>
+
+<style>
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* LUZ */
+.container::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg,#00f2ff,#ff512f,#ffd700,#ff00cc);
+  box-shadow: 0 0 20px white;
+  z-index: 5;
+}
+
+/* FLECHA */
+.pointer {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  z-index: 20;
+
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 34px solid black;
+}
+
+.pointer::after {
+  content: "";
+  position: absolute;
+  top: -32px;
+  left: -14px;
+
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 28px solid #ffd700;
+
+  filter:
+    drop-shadow(0 0 5px #ffd700)
+    drop-shadow(0 0 10px #ffd700)
+    drop-shadow(0 0 20px #ffea00);
+}
+
+/* TRACK */
+.track {
+  display: flex;
+  position: absolute;
+}
+
+/* BLUR FINAL */
+.track.blur {
+  filter: blur(6px);
+  opacity: 0.2;
+}
+
+/* ITEMS */
+.item {
+  width: 240px;
+  height: 200px;
+  margin: 0 5px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+}
+
+.item span {
+  font-size: 30px;
+  font-weight: 900;
+  color: white;
+  -webkit-text-stroke: 1px black;
+  text-shadow: 0 0 10px black;
+}
+
+.emoji {
+  font-size: 55px;
+}
+
+/* COLORES */
+.bronce { background: linear-gradient(135deg,#5c3b1e,#8b5a2b); }
+.plata { background: linear-gradient(135deg,#aaa,#eee); }
+.oro { background: linear-gradient(135deg,#ffd700,#b8860b); }
+.diamante { background: linear-gradient(135deg,#00f2ff,#8a2be2); }
+
+.unreal {
+  background: linear-gradient(135deg,#ff00cc,#3333ff);
+  box-shadow: 0 0 40px #ff00cc;
+}
+
+/* GANADOR */
+#winnerText {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.7);
+
+  padding: 12px 25px;
+  border-radius: 14px;
+
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+
+  opacity: 0;
+
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(12px);
+
+  text-shadow: 0 0 10px black;
+  box-shadow: 0 0 20px rgba(0,0,0,0.9);
+
+  transition: all 0.4s ease;
+}
+
+#winnerText.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.05);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="pointer"></div>
+  <div class="track" id="track"></div>
+  <div id="winnerText"></div>
+</div>
+
+<script>
+const track = document.getElementById("track");
+const winnerText = document.getElementById("winnerText");
+
+/* ITEMS */
+const items = [
+  {name:"Bronce", emoji:"🥉"},
+  {name:"Plata", emoji:"🥈"},
+  {name:"Oro", emoji:"🥇"},
+  {name:"Diamante", emoji:"💎"},
+  {name:"Unreal", emoji:"👑"}
+];
+
+/* GENERAR RULETA */
+for(let i=0;i<200;i++){
+  const item = items[Math.floor(Math.random()*items.length)];
+
+  const div=document.createElement("div");
+  div.className="item " + item.name.toLowerCase();
+
+  div.innerHTML = `
+    <div class="emoji">${item.emoji}</div>
+    <span>${item.name}</span>
+  `;
+
+  track.appendChild(div);
+}
+
+/* SPIN REAL */
+function spinRoulette(){
+
+  const itemWidth = 250;
+  const move = Math.floor(Math.random() * 3000) + 2000;
+
+  track.animate([
+    { transform:'translateX(0)' },
+    { transform:`translateX(-${move}px)` }
+  ],{
+    duration:3000,
+    easing:'cubic-bezier(0.1, 0.7, 0.1, 1)',
+    fill:'forwards'
+  });
+
+  setTimeout(()=>{
+
+    track.style.transform = `translateX(-${move}px)`;
+
+    const container = document.querySelector(".container");
+    const center = container.offsetWidth / 2;
+
+    const index = Math.floor((move + center) / itemWidth);
+
+    const selected = track.children[index];
+
+    const name = selected.querySelector("span").innerText;
+    const emoji = selected.querySelector(".emoji").innerText;
+
+    track.classList.add("blur");
+
+    winnerText.innerText = `🔥 SOS EL RANGO: ${emoji} ${name}`;
+    winnerText.classList.add("show");
+
+  },3000);
+}
+
+spinRoulette();
+</script>
+
+</body>
+</html>
